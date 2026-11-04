@@ -39,7 +39,7 @@ Prometheus, Grafana, and the EFK stack provide monitoring, visualization, and ce
 
 ## 🏗️ Architecture
 
-![End-to-End DevOps Architecture](images/architecture.png)
+![End-to-End DevOps Architecture](architecture.png)
 
 ### Architecture Workflow
 
