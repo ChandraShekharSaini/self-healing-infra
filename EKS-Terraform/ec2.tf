@@ -5,7 +5,7 @@
 resource "aws_instance" "eks" {
   ami = "ami-02dfbd4ff395f2a1b"
 
-  instance_type = "t2.medium"
+  instance_type = "t3.medium"
 
   subnet_id = aws_subnet.public1.id
 
