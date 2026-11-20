@@ -353,7 +353,7 @@ resource "aws_iam_role_policy_attachment" "ecr" {
 ###########################################################
 
 resource "aws_eks_cluster" "eks" {
-  name = "naresh"
+  name = "chandra"
 
   role_arn = aws_iam_role.cluster_role.arn
 
@@ -377,7 +377,7 @@ resource "aws_eks_cluster" "eks" {
   ]
 
   tags = {
-    Name        = "naresh"
+    Name        = "chandra"
     Environment = "dev"
     Project     = "eks-project"
   }
