@@ -65,7 +65,7 @@ resource "aws_db_instance" "mysql" {
   max_allocated_storage = 50
   storage_type          = "gp3"
 
-  db_name  = "shopping"
+  db_name  = "cloud"
   username = "admin"
   password = "qazqaz1231"
 
