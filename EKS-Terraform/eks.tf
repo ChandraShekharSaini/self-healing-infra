@@ -384,26 +384,98 @@ resource "aws_eks_cluster" "eks" {
 }
 
 ###########################################################
+# EKS NODE DATA 
+###########################################################
+
+data "aws_ami" "ubuntu_eks" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name = "name"
+
+    values = [
+      "ubuntu-eks/k8s_1.35/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*"
+    ]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
+
+
+###########################################################
+# EKS WORKER LAUNCH TEMPLATE
+###########################################################
+
+resource "aws_launch_template" "eks_node_template" {
+
+  name = "chandra-eks-ubuntu-template"
+
+  image_id      = data.aws_ami.ubuntu_eks.id
+  instance_type = "t3.medium"
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_size           = 30
+      volume_type           = "gp3"
+      encrypted             = true
+      delete_on_termination = true
+    }
+  }
+
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+set -euxo pipefail
+
+# Join Ubuntu EKS worker to cluster
+/etc/eks/bootstrap.sh chandra
+EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name        = "chandra-ubuntu-worker"
+      Environment = "dev"
+      Project     = "eks-project"
+    }
+  }
+
+  tags = {
+    Name = "chandra-eks-ubuntu-template"
+  }
+}
+
+###########################################################
 # EKS NODE GROUP
 ###########################################################
 
-resource "aws_eks_node_group" "node_group" {
-  cluster_name = aws_eks_cluster.eks.name
+resource "aws_eks_node_group" "ubuntu_node_group" {
 
-  node_group_name = "eks-node-group"
-
-  node_role_arn = aws_iam_role.worker_role.arn
-
-  version = var.cluster_version
+  cluster_name    = aws_eks_cluster.eks.name
+  node_group_name = "eks-ubuntu-node-group"
+  node_role_arn   = aws_iam_role.worker_role.arn
 
   subnet_ids = [
     aws_subnet.private1.id,
     aws_subnet.private2.id
   ]
 
-  instance_types = [
-    "t3.medium"
-  ]
+  launch_template {
+    id      = aws_launch_template.eks_node_template.id
+    version = aws_launch_template.eks_node_template.latest_version
+  }
 
   scaling_config {
     desired_size = 2
@@ -418,12 +490,13 @@ resource "aws_eks_node_group" "node_group" {
   ]
 
   tags = {
-    Name        = "eks-node"
+    Name        = "eks-ubuntu-node"
     Environment = "dev"
     Project     = "eks-project"
     Owner       = "veeraops"
   }
 }
+
 
 ###########################################################
 # EKS ADDON - VPC CNI
