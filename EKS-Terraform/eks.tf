@@ -392,10 +392,9 @@ data "aws_ami" "ubuntu_eks" {
   owners      = ["099720109477"]
 
   filter {
-    name = "name"
-
+    name   = "name"
     values = [
-      "ubuntu-eks/k8s_1.35/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*"
+      "ubuntu-eks/k8s_1.35/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
     ]
   }
 
@@ -409,7 +408,6 @@ data "aws_ami" "ubuntu_eks" {
     values = ["available"]
   }
 }
-
 
 ###########################################################
 # EKS WORKER LAUNCH TEMPLATE
