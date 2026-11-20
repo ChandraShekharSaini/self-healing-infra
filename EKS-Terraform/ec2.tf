@@ -1,61 +1,100 @@
 ###########################################################
-# ADMIN EC2
+# UBUNTU 24.04 AMI
 ###########################################################
 
-resource "aws_instance" "eks" {
-  ami = "ami-02dfbd4ff395f2a1b"
+data "aws_ssm_parameter" "ubuntu_ami" {
+  name = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
+}
+
+###########################################################
+# UBUNTU ADMIN EC2 LAUNCH TEMPLATE
+###########################################################
+
+resource "aws_launch_template" "eks_admin_lt" {
+
+  name = "eks-admin-ubuntu-launch-template"
+
+  image_id = data.aws_ssm_parameter.ubuntu_ami.value
 
   instance_type = "t3.medium"
-
-  subnet_id = aws_subnet.public1.id
 
   vpc_security_group_ids = [
     aws_security_group.allow_all.id
   ]
 
-  iam_instance_profile = aws_iam_instance_profile.eks_admin_profile.name
+  iam_instance_profile {
+    name = aws_iam_instance_profile.eks_admin_profile.name
+  }
 
-  root_block_device {
-    volume_size = 30
+  block_device_mappings {
+    device_name = "/dev/sda1"
+
+    ebs {
+      volume_size           = 30
+      volume_type           = "gp3"
+      encrypted             = true
+      delete_on_termination = true
+    }
+  }
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name        = "eks-admin-ubuntu"
+      Environment = "dev"
+      Project     = "eks-project"
+    }
   }
 
   tags = {
-    Name = "eks-admin"
+    Name = "eks-admin-ubuntu-launch-template"
+  }
+}
+
+
+###########################################################
+# ADMIN EC2
+###########################################################
+resource "aws_instance" "eks" {
+
+  subnet_id = aws_subnet.public1.id
+
+  launch_template {
+    id = aws_launch_template.eks_admin_lt.id
+
+    version = aws_launch_template.eks_admin_lt.latest_version
   }
 
-  depends_on = [
-    aws_eks_access_policy_association.eks_admin
-  ]
-
-user_data = <<-EOF
+  user_data = base64encode(<<-EOF
 #!/bin/bash
 
 set -euxo pipefail
 
 exec > /var/log/eks-admin-setup.log 2>&1
 
-echo "====================================="
-echo "Starting EKS Admin EC2 setup"
-echo "====================================="
+apt-get update -y
 
-# Install required packages
-dnf install -y unzip tar gzip
-
-# Verify existing curl
-curl --version
+apt-get install -y \
+  curl \
+  unzip \
+  tar \
+  gzip \
+  jq
 
 # Install AWS CLI
-if ! command -v aws >/dev/null 2>&1; then
-    curl -fL \
-      "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-      -o /tmp/awscliv2.zip
+curl -fL \
+  https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip \
+  -o /tmp/awscliv2.zip
 
-    unzip -q /tmp/awscliv2.zip -d /tmp
-    /tmp/aws/install
-fi
+unzip -q /tmp/awscliv2.zip -d /tmp
 
-aws --version
-aws configure set region us-east-1
+/tmp/aws/install
 
 # Install kubectl
 KUBECTL_VERSION="v1.35.0"
@@ -65,53 +104,45 @@ curl -fL \
   -o /tmp/kubectl
 
 install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
-rm -f /tmp/kubectl
-
-/usr/local/bin/kubectl version --client
 
 # Install eksctl
 curl -fL \
-  "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_linux_amd64.tar.gz" \
+  https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_linux_amd64.tar.gz \
   -o /tmp/eksctl.tar.gz
 
 tar -xzf /tmp/eksctl.tar.gz -C /tmp
 
 install -m 0755 /tmp/eksctl /usr/local/bin/eksctl
 
-rm -f /tmp/eksctl.tar.gz /tmp/eksctl
-
-/usr/local/bin/eksctl version
+# Configure AWS region
+export AWS_DEFAULT_REGION=us-east-1
 
 # Wait for EKS cluster
-echo "Waiting for EKS cluster..."
-
 until aws eks describe-cluster \
   --name chandra \
   --region us-east-1 >/dev/null 2>&1
 do
-    sleep 20
+  sleep 20
 done
 
-# Wait until ACTIVE
+# Wait for ACTIVE
 while true; do
 
-    STATUS=$(aws eks describe-cluster \
-      --name chandra \
-      --region us-east-1 \
-      --query 'cluster.status' \
-      --output text)
+  STATUS=$(aws eks describe-cluster \
+    --name chandra \
+    --region us-east-1 \
+    --query 'cluster.status' \
+    --output text)
 
-    echo "Cluster status: $STATUS"
+  if [ "$STATUS" = "ACTIVE" ]; then
+    break
+  fi
 
-    if [ "$STATUS" = "ACTIVE" ]; then
-        break
-    fi
-
-    sleep 20
+  sleep 20
 
 done
 
-# Create kubeconfig
+# Configure kubeconfig
 mkdir -p /root/.kube
 
 aws eks update-kubeconfig \
@@ -119,29 +150,28 @@ aws eks update-kubeconfig \
   --region us-east-1 \
   --kubeconfig /root/.kube/config
 
-chmod 600 /root/.kube/config
-
 export KUBECONFIG=/root/.kube/config
 
 # Wait for Kubernetes nodes
-until /usr/local/bin/kubectl get nodes >/dev/null 2>&1; do
-
-    echo "Waiting for Kubernetes nodes..."
-
-    sleep 15
-
+until kubectl get nodes >/dev/null 2>&1; do
+  sleep 15
 done
 
-# Verify
-/usr/local/bin/kubectl get nodes -o wide
+kubectl get nodes -o wide
 
-/usr/local/bin/kubectl get pods -A
+kubectl get pods -A
 
-echo "====================================="
-echo "EKS Admin setup completed successfully"
-echo "====================================="
+echo "EKS Admin Ubuntu setup completed"
 
 EOF
+  )
 
+  depends_on = [
+    aws_eks_access_policy_association.eks_admin
+  ]
 
+  tags = {
+    Name = "eks-admin-ubuntu"
+  }
 }
+
