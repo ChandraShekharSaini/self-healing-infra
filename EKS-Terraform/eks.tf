@@ -461,7 +461,7 @@ EOF
 # EKS NODE GROUP
 ###########################################################
 
-resource "aws_eks_node_group" "ubuntu_node_group" {
+resource "aws_eks_node_group" "node_group" {
 
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "eks-ubuntu-node-group"
