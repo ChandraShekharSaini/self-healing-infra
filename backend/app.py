@@ -221,9 +221,9 @@ def build_order_receipt(order_payload):
         ]
     ) or "No item details found."
 
-    text_body = (
+    text_body = ( 
         f"Hello Narni {order_payload['shipping_name']},\n\n"
-        f"Your Google Store order In  Multicloud Devops by Veera Sir Nareshit Microservices Ecommerce website #{order_payload['id']} has been placed successfully.\n\n"
+        f"Your Google Store order In  Multicloud Devops by Chandra Shekhar Microservices Ecommerce website #{order_payload['id']} has been placed successfully.\n\n"
         "Customer Details\n"
         "----------------\n"
         f"Name: {order_payload['shipping_name']}\n"
@@ -274,7 +274,7 @@ def build_order_receipt(order_payload):
     escaped_address = escape(str(shipping_address)).replace("\n", "<br>")
     html_body = f"""
     <div style="font-family:Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px;color:#202124;">
-      <h2 style="margin-top:0;color:#1a73e8;">multicloud devops by veera sir store Receipt</h2>
+      <h2 style="margin-top:0;color:#1a73e8;">multicloud devops by Chandra Shekhar Saini store Receipt</h2>
       <p>Your order Akki <strong>#{order_payload['id']}</strong> has been placed successfully narnii.</p>
 
       <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin:16px 0;background:#f8fafc;">
@@ -330,7 +330,7 @@ def send_order_receipt_email(order_payload):
         raise RuntimeError("MAIL_PASSWORD is not configured")
 
     msg = Message(
-        f"multicloud devops by veera sir store - Order #{order_payload['id']}",
+        f"multicloud devops by Chandra Shekhar sir store - Order #{order_payload['id']}",
         sender=app.config["MAIL_USERNAME"],
         recipients=[order_payload["shipping_email"]],
     )
@@ -354,7 +354,7 @@ def send_order_receipt_email_async(order_payload):
 def build_recharge_receipt(recharge_payload):
     text_body = (
         f"Hello {recharge_payload['email']},\n\n"
-        f"Your Google Pay recharge In  Multicloud Devops by Veera Sir Nareshit Microservices Ecommerce website #{recharge_payload['id']} has been saved successfully.\n\n"
+        f"Your Google Pay recharge In  Multicloud Devops by Chnadra Shekhar Saini Microservices Ecommerce website #{recharge_payload['id']} has been saved successfully.\n\n"
         "Recharge Details\n"
         "----------------\n"
         f"Mobile Number: {recharge_payload['mobile_number']}\n"
@@ -529,7 +529,7 @@ def signup_request():
             sender=app.config["MAIL_USERNAME"],
             recipients=[email],
         )
-        msg.body = f"Hello {username},harshi your registration OTP for Multicloud Devops by Veera Sir Nareshit Microservices Ecommerce website is {otp}. It expires in 10 minutes."
+        msg.body = f"Hello {username},harshi your registration OTP for Multicloud Devops by Chandra Shekhar Saini Microservices Ecommerce website is {otp}. It expires in 10 minutes."
         mail.send(msg)
         return jsonify({"message": "OTP sent to email!"}), 200
     except Exception as exc:
@@ -654,7 +654,7 @@ def login_request():
             sender=app.config["MAIL_USERNAME"],
             recipients=[email],
         )
-        msg.body = f"Your login OTP for Multicloud Devops by Veera Sir Nareshit Microservices Ecommerce website is {otp}. It expires in 5 minutes."
+        msg.body = f"Your login OTP for Multicloud Devops by Chandra Shekhar Saini Microservices Ecommerce website is {otp}. It expires in 5 minutes."
         mail.send(msg)
         return jsonify({"message": "OTP sent to email", "otp_required": True}), 200
     except Exception as exc:
