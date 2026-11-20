@@ -490,10 +490,10 @@ resource "aws_eks_node_group" "ubuntu_node_group" {
   ]
 
   tags = {
-    Name        = "eks-ubuntu-node"
+    Name        = "eks-node"
     Environment = "dev"
     Project     = "eks-project"
-    Owner       = "veeraops"
+    Owner       = "chandraops"
   }
 }
 
