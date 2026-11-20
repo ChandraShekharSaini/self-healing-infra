@@ -171,7 +171,7 @@ EOF
   ]
 
   tags = {
-    Name = "eks-admin-ubuntu"
+    Name = "eks-admin"
   }
 }
 
