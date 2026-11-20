@@ -1,15 +1,27 @@
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
+
 metadata:
   name: shop-ingress
   namespace: microservices
   annotations:
     kubernetes.io/ingress.class: nginx
+
 spec:
   rules:
-    - host:
-      http:
+    - http:
         paths:
+          # Backend API
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 80
+
+          # Main Frontend
           - path: /
             pathType: Prefix
             backend:
@@ -18,6 +30,7 @@ spec:
                 port:
                   number: 80
 
+          # Ecommerce Microservices
           - path: /appliances
             pathType: Prefix
             backend:
