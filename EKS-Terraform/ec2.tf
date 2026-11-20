@@ -86,7 +86,7 @@ rm -f /tmp/eksctl.tar.gz /tmp/eksctl
 echo "Waiting for EKS cluster..."
 
 until aws eks describe-cluster \
-  --name naresh \
+  --name chandra \
   --region us-east-1 >/dev/null 2>&1
 do
     sleep 20
@@ -96,7 +96,7 @@ done
 while true; do
 
     STATUS=$(aws eks describe-cluster \
-      --name naresh \
+      --name chandra \
       --region us-east-1 \
       --query 'cluster.status' \
       --output text)
@@ -115,7 +115,7 @@ done
 mkdir -p /root/.kube
 
 aws eks update-kubeconfig \
-  --name naresh \
+  --name chandra \
   --region us-east-1 \
   --kubeconfig /root/.kube/config
 
