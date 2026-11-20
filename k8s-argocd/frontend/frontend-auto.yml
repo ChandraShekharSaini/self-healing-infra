@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/ChandraShekharSaini/kubernetes.git
+    repoURL: https://github.com/ChandraShekharSaini/self-healing-infra.git
     path: frontend/auto
     targetRevision: master
   destination:
