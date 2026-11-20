@@ -187,7 +187,7 @@ spec:
   ingressClassName: nginx
 
   rules:
-    - host: 905418316901.realhandsonlabs.net
+    - host: 633031012455.realhandsonlabs.net
       http:
         paths:
 
