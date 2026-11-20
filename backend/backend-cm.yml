@@ -13,7 +13,7 @@ data:
 #if mysql on RDS
   DB_HOST: "shopping-mysql.co9ok44ouu0e.us-east-1.rds.amazonaws.com"
   DB_USER: "admin"
-  DB_PASSWORD: "qazqaz123"
+  DB_PASSWORD: "qazqaz1231"
   DB_NAME: "cloud"
 
   MAIL_SERVER: "smtp.gmail.com"
