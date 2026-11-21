@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 set -e
@@ -229,4 +228,4 @@ echo ""
 echo "======================================"
 echo " Argo CD Installation Complete"
 echo "======================================"
-```
+
