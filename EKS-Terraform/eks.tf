@@ -424,7 +424,7 @@ resource "aws_launch_template" "eks_node_template" {
     device_name = "/dev/sda1"
 
     ebs {
-      volume_size           = 30
+      volume_size           = 50
       volume_type           = "gp3"
       encrypted             = true
       delete_on_termination = true
