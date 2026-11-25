@@ -15,6 +15,16 @@ resource "aws_security_group" "rds_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "PostgreSQL from EKS VPC"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+
   egress {
     description = "Allow outbound traffic"
     from_port   = 0
@@ -89,6 +99,56 @@ resource "aws_db_instance" "mysql" {
 
   tags = {
     Name        = "shopping-mysql"
+    Environment = "dev"
+    Project     = "eks-project"
+  }
+}
+
+
+
+###########################################################
+# POSTGRESQL RDS INSTANCE
+###########################################################
+
+resource "aws_db_instance" "postgres" {
+
+  identifier = "shopping-postgres"
+
+  engine         = "postgres"
+  engine_version = "16"
+
+  instance_class = "db.t3.micro"
+
+  allocated_storage      = 20
+  max_allocated_storage = 25
+  storage_type           = "gp3"
+
+  db_name  = "cloud"
+  username = "postgres"
+  password = "qazqaz1231"
+
+  port = 5432
+
+  # Reuse existing subnet group
+  db_subnet_group_name = aws_db_subnet_group.mysql.name
+
+  # Reuse existing RDS security group
+  vpc_security_group_ids = [
+    aws_security_group.rds_sg.id
+  ]
+
+  publicly_accessible = true
+
+  backup_retention_period = 7
+
+  multi_az = false
+
+  skip_final_snapshot = true
+
+  deletion_protection = false
+
+  tags = {
+    Name        = "shopping-postgres"
     Environment = "dev"
     Project     = "eks-project"
   }
