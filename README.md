@@ -576,7 +576,7 @@ argocd app sync <APPLICATION_NAME>
 Cloud & DevOps Engineer | AWS | Python | Kubernetes | Terraform | Docker | CI/CD | GitOps | Monitoring
 
 - GitHub: https://github.com/ChandraShekharSaini
-- Project Repository: Add your actual repository URL here.
+- Project Repository: https://github.com/ChandraShekharSaini/self-healing-infra.git
 
 ## ⭐ Support
 
